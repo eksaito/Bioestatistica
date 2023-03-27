@@ -1,6 +1,6 @@
 # Bioestatistica
 
-Material de práticas utilizado na disciplinas de Bioestatística UFRJ-Macaé
+Material de práticas em R utilizado na disciplinas de Bioestatística UFRJ-Macaé
 
 Autor: Eric Kauati Saito
 
