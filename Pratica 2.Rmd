@@ -1,0 +1,103 @@
+---
+title: "Bioestatística - Teste de Hipóteses"
+author: "Eric Kauati Saito"
+date: '2022-07-04'
+output:
+  pdf_document: default
+  html_document: default
+---
+
+# Relembrando
+
+Carregando os dados:
+```{r dados}
+dados = read.table(file="D:\\MACAE UFRJ\\2022\\R\\dados_pratica.csv", sep=",", header=TRUE)
+```
+
+Vamos tentar comparar a idade dos voluntários e as categoria de tabagismo.
+
+Primeiro vamos tentar ver o boxplot, para isso façamos:
+```{r boxplot}
+boxplot(dados$age ~ dados$smoking_status)
+```
+
+Relembrando que ao fazer dados\$age, estamos vendo a coluna da idade ('age') e dados\$smoking_status estamos vendo as categorias de tabagismo.
+
+(dados\$age ~ dados\$smoking_status): "estamos vendo a idade (age) para cada categoria  de tabagismo (smoking_status)"
+
+Vejam que tem uma categoria "Unknown", possivelmente pessoas que não quiseram responder a essa pergunta, ou outros motivos. Vamos remover dos nossos dados para que não influencie nos nossos resultados:
+```{r remover}
+dados_remov = dados[!dados$smoking_status=="Unknown",] 
+```
+Vejam dados_remov, não deve ter ninguem com smoking_status "Unknown". Se prestarem atenção, é bem parecido com a prática anterior, quando estávamos interessados em pegar apenas as pessoas que eram fumantes ("smokes"), só que tem um "!" dentro dos colchetes na frente da expressão.
+
+"!" é não (not), ou seja, não pegue os que smoking_status "Unknown".
+
+Vamos separar outro conjunto de dados para outras análises:
+```{r glicose}
+n_fumante = dados[dados$smoking_status=='never smoked',] #Pessoas que nunca fumaram
+fumante = dados[dados$smoking_status=='smokes',] #Pessoas que fumam
+```
+
+# Testes Estatísticos
+
+## Intervalo de Confiança
+O intervalo de confiança para o nível médio de glicose de fumantes, com nível de confiança de 90%:
+```{r int_confianca}
+t.test(fumante$avg_glucose_level, conf.level = 0.9) #Intervalo de confiança para 90%
+```
+Vejam que aparece a média amostral e o intervalo de confiança.
+
+Obs.: Se vocês prestarem atenção, ele fez um teste de hipótese. Mas como não colocamos mais nenhum parâmetro, ele testou para uma média igual a zero. Não queremos isso, pode ignorar.
+
+## Testes de Hipótese
+
+### Teste t
+test t para duas amostras, comparando o nível médio de glicose de fumantes e de não fumantes:
+```{r testet}
+t.test(fumante$avg_glucose_level, n_fumante$avg_glucose_level, alternative = "two.sided") 
+```
+Teve diferença?
+Nesse caso a hipótese nula foi dizer que as médias são iguais e a alternativa foi dizer que são diferentes. (teste bilateral)
+Caso vocês estejam trabalhando com teste unilateral, tem que mudar a opção da hipótese alternativa:
+alternative = "less"
+alternative = "greater"
+
+### Wilcoxon rank sum test
+
+Caso fosse nescessário um teste não-paramétrico:
+```{r wilcox}
+wilcox.test(fumante$avg_glucose_level, n_fumante$avg_glucose_level, alternative = "two.sided")
+```
+
+### Pareado
+
+Teste pareado (paired = TRUE):
+```{r pareado}
+
+#t.test(fumante$avg_glucose_level, n_fumante$avg_glucose_level, paired = TRUE) 
+#wilcox.test(fumante$avg_glucose_level, n_fumante$avg_glucose_level, paired = TRUE)
+
+```
+Nesse caso não conseguimos rodar, ele vai dar erro. Isso porque não tem o mesmo número de observações, se fossem dados realmente pareados, teriam que ter o mesmo número de observações. E os dados teriam que estar na ordem correta.
+
+
+## ANOVA
+ANOVA
+
+"a idade (age) para cada categoria  de tabagismo (smoking_status)":
+```{r ANOVA}
+oneway.test(age ~ smoking_status, data=dados_remov, var.equal=T)
+#F = FALSE -> variancia diferentes
+#T = TRUE -> variancia igual
+```
+Para um nível de significância de alfa = 10%, como analisamos esse resultado?
+E agora, o que precisamos fazer?
+
+### post-hoc
+
+Teste post-hoc:
+```{r post_hoc}
+model <- aov(age ~ smoking_status, data=dados_remov)
+TukeyHSD(model, conf.level=.95)
+```
