@@ -9,7 +9,7 @@
 
 # Carregar dados do arquivo
 
-dados <- read.table(file="D:\\Macae Disciplinas\\2022\\R\\healthcare-dataset-stroke-data.csv", sep=",", header=T)
+dados <- read.table(file="healthcare-dataset-stroke-data.csv", sep=",", header=T)
 
 # Trabalhando com os dados
 ## Primeiras an?lises
